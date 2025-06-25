@@ -31,8 +31,8 @@
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
   const supabase = createClient(
-    import.meta.env.VITE_SUPABASE_URL,
-    import.meta.env.VITE_SUPABASE_ANON_KEY
+    'https://llbsahsbmnjbdmgqkwpv.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsYnNhaHNibW5qYmRtZ3Frd3B2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA4NTI0MTcsImV4cCI6MjA2NjQyODQxN30.FQB4Cq0_K_3c6-o70o7dfM6UAY67yuYl7tjFgT4GCTQ'
   );
 
   window.supabase = supabase; // So you can use it globally
