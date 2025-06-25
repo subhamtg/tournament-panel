@@ -35,7 +35,8 @@
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsYnNhaHNibW5qYmRtZ3Frd3B2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA4NTI0MTcsImV4cCI6MjA2NjQyODQxN30.FQB4Cq0_K_3c6-o70o7dfM6UAY67yuYl7tjFgT4GCTQ'
   );
 
-  window.supabase = supabase; // So you can use it globally
+  const { data: { user } } = await supabase.auth.getUser();
+  console.log("User info:", user); // will be null if not logged in
 </script>
 
 </head>
