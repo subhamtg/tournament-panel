@@ -3,475 +3,166 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tournament User Panel</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>User Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
-    body {
-      font-family: 'Orbitron', sans-serif;
-    }
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #1a1a2e;
-    }
-    ::-webkit-scrollbar-thumb {
-      background-color: #7e22ce;
-      border-radius: 8px;
-      border: 2px solid #1a1a2e;
-    }
-    * {
-      scrollbar-width: thin;
-      scrollbar-color: #7e22ce #1a1a2e;
-    }
-  </style>
-  <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 font-sans">
 
-  const supabase = createClient(
-    'https://llbsahsbmnjbdmgqkwpv.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsYnNhaHNibW5qYmRtZ3Frd3B2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA4NTI0MTcsImV4cCI6MjA2NjQyODQxN30.FQB4Cq0_K_3c6-o70o7dfM6UAY67yuYl7tjFgT4GCTQ'
+<!-- Header for mobile -->
+<header class="md:hidden flex items-center justify-between bg-blue-600 text-white p-4">
+  <h1 class="text-xl font-bold">Dashboard</h1>
+  <button onclick="toggleSidebar()" class="focus:outline-none">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+         viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 6h16M4 12h16M4 18h16"/>
+    </svg>
+  </button>
+</header>
+
+<!-- Sidebar -->
+<div id="sidebar" class="fixed md:static z-50 top-0 left-0 w-64 h-full bg-gradient-to-br from-blue-600 to-purple-600 text-white p-6 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+  <h2 class="text-2xl font-bold mb-6 hidden md:block">Dashboard</h2>
+  <nav class="space-y-4">
+    <button onclick="showTab('profile')" class="block w-full text-left hover:underline">👤 Profile</button>
+    <button onclick="showTab('edit')" class="block w-full text-left hover:underline">✏️ Edit Info</button>
+    <button onclick="showTab('password')" class="block w-full text-left hover:underline">🔒 Change Password</button>
+    <button onclick="showTab('notifications')" class="block w-full text-left hover:underline">🔔 Notifications</button>
+    <button onclick="showTab('support')" class="block w-full text-left hover:underline">📨 Messages</button>
+    <button onclick="logout()" class="block w-full text-left text-red-400 hover:underline">🚪 Logout</button>
+  </nav>
+</div>
+
+<!-- Main Content -->
+<div class="md:ml-64 p-4 md:p-8">
+  <!-- Profile -->
+  <div id="profile" class="tab">
+    <h2 class="text-2xl font-semibold mb-4">👤 Welcome, <span id="username">Loading...</span></h2>
+    <p>Email: <span id="email">Loading...</span></p>
+    <p>Mobile: <span id="mobile">Loading...</span></p>
+  </div>
+
+  <!-- Edit Info -->
+  <div id="edit" class="tab hidden">
+    <h2 class="text-2xl font-semibold mb-4">✏️ Edit Info</h2>
+    <form class="space-y-4" onsubmit="event.preventDefault(); updateInfo();">
+      <input id="newName" type="text" placeholder="New Name" class="w-full p-2 border rounded" />
+      <input id="newEmail" type="email" placeholder="New Email" class="w-full p-2 border rounded" />
+      <input id="newMobile" type="tel" placeholder="New Mobile Number" class="w-full p-2 border rounded" />
+      <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Update Info</button>
+    </form>
+  </div>
+
+  <!-- Change Password -->
+  <div id="password" class="tab hidden">
+    <h2 class="text-2xl font-semibold mb-4">🔒 Change Password</h2>
+    <form class="space-y-4" onsubmit="event.preventDefault(); changePassword();">
+      <input id="oldPassword" type="password" placeholder="Old Password" class="w-full p-2 border rounded" />
+      <input id="newPassword" type="password" placeholder="New Password" class="w-full p-2 border rounded" />
+      <input id="confirmPassword" type="password" placeholder="Confirm New Password" class="w-full p-2 border rounded" />
+      <button class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">Change Password</button>
+    </form>
+  </div>
+
+  <!-- Notifications -->
+  <div id="notifications" class="tab hidden">
+    <h2 class="text-2xl font-semibold mb-4">🔔 Notifications</h2>
+    <ul class="list-disc pl-6 space-y-2">
+      <li>📅 Your subscription renews in 5 days.</li>
+      <li>✅ Profile updated successfully.</li>
+      <li>🛡️ Password changed last week.</li>
+    </ul>
+  </div>
+
+  <!-- Support/Messages -->
+  <div id="support" class="tab hidden">
+    <h2 class="text-2xl font-semibold mb-4">📨 Support / Messages</h2>
+    <form class="space-y-4">
+      <textarea placeholder="Type your message..." class="w-full p-2 border rounded h-32"></textarea>
+      <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Send Message</button>
+    </form>
+  </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+  const supabase = supabase.createClient(
+    'https://your-project.supabase.co', // Replace with your Supabase URL
+    'public-anon-key' // Replace with your Supabase anon/public key
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
-  console.log("User info:", user); // will be null if not logged in
-</script>
-
-</head>
-<body class="bg-gradient-to-br from-black via-gray-900 to-black text-white min-h-screen w-screen overflow-x-hidden">
-
-  <!-- Profile Settings Modal -->
-<div id="profileModal" class="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-md z-50 hidden items-center justify-center">
-  <div class="bg-[#1a1a2e] border border-purple-700 p-6 rounded-xl w-full max-w-lg space-y-4 relative">
-    <button id="closeProfileModal" class="absolute top-3 right-4 text-yellow-400 hover:text-yellow-300 text-xl">✖</button>
-    <h3 class="text-xl font-bold text-yellow-400 mb-2">Edit Personal Information</h3>
-
-    <input type="text" placeholder="Full Name" class="w-full p-2 rounded bg-gray-800 border border-purple-600 text-white placeholder-gray-400" />
-    <input type="tel" placeholder="Update Mobile Number" class="w-full p-2 rounded bg-gray-800 border border-purple-600 text-white placeholder-gray-400" />
-    <input type="email" placeholder="Update Email ID" class="w-full p-2 rounded bg-gray-800 border border-purple-600 text-white placeholder-gray-400" />
-
-    <button class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded w-full">Save Changes</button>
-  </div>
-</div>
-
-  
-  <!-- Profile Settings Modal -->
-<div id="profileModal" class="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-md z-50 hidden items-center justify-center">
-  <div class="bg-[#1a1a2e] border border-purple-700 p-6 rounded-xl w-full max-w-lg space-y-4 relative">
-    <button id="closeProfileModal" class="absolute top-3 right-4 text-yellow-400 hover:text-yellow-300 text-xl">✖</button>
-    <h3 class="text-xl font-bold text-yellow-400 mb-2">Edit Personal Information</h3>
-
-    <input type="text" placeholder="Full Name" class="w-full p-2 rounded bg-gray-800 border border-purple-600 text-white placeholder-gray-400" />
-    <input type="tel" placeholder="Update Mobile Number" class="w-full p-2 rounded bg-gray-800 border border-purple-600 text-white placeholder-gray-400" />
-    <input type="email" placeholder="Update Email ID" class="w-full p-2 rounded bg-gray-800 border border-purple-600 text-white placeholder-gray-400" />
-    <!-- Save Changes button inside profileModal -->
-    <button class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded w-full">Save Changes</button>
-
-    <script>
-document.querySelector('#profileModal button.bg-purple-600').addEventListener('click', async () => {
-  const name = document.querySelector('#profileModal input[placeholder="Full Name"]').value;
-  const mobile = document.querySelector('#profileModal input[placeholder="Update Mobile Number"]').value;
-  const email = document.querySelector('#profileModal input[placeholder="Update Email ID"]').value;
-
-  const { error } = await supabase.auth.updateUser({
-    email,
-    data: { name, mobile }
-  });
-
-  if (error) {
-    alert('Update failed: ' + error.message);
-  } else {
-    alert('Profile updated!');
-    getUserInfo();
-    hideModal(profileModal);
-  }
-});
-</script>
-
-  </div>
-</div>
-
-  
-  <!-- Sidebar -->
-  <div id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-[#1a1a2ecc] backdrop-blur-md border-r border-purple-700 z-50 transform -translate-x-full transition-transform duration-300">
-    <div class="p-4 text-yellow-400 font-bold text-xl border-b border-purple-700">Menu</div>
-    <ul class="p-4 space-y-4 text-gray-300">
-      <li class="hover:text-yellow-400 cursor-pointer">🏠 Home</li>
-      <li class="hover:text-yellow-400 cursor-pointer">👤 Profile Settings</li>
-      <li class="hover:text-yellow-400 cursor-pointer">🕹 Game Gear</li>
-      <li class="hover:text-yellow-400 cursor-pointer">📊 Leaderboard</li>
-      <li class="hover:text-yellow-400 cursor-pointer">❓ Help Center</li>
-      <li class="hover:text-yellow-400 cursor-pointer">📜 Terms & Conditions</li>
-      <li class="hover:text-yellow-400 cursor-pointer">🔐 Privacy Policy</li>
-    </ul>
-    <button id="closeSidebar" class="absolute top-2 right-2 text-yellow-400 hover:text-yellow-300">✖</button>
-  </div>
-
-  <!-- Navbar -->
-  <header class="w-full bg-[#121225] py-4 px-6 border-b border-purple-700 shadow-md relative z-10 flex items-center justify-between">
-    <div class="flex items-center space-x-4">
-      <button id="menuBtn" class="text-yellow-400 hover:text-yellow-300 focus:outline-none text-xl">☰</button>
-      <h1 class="text-2xl font-bold text-yellow-400">🏆 Gamer Tournament</h1>
-    </div>
-    <div class="flex items-center space-x-4">
-      <button id="notificationBtn" aria-label="Toggle Notifications" class="relative text-yellow-400 hover:text-yellow-300 focus:outline-none">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-        </svg>
-        <span id="notificationBadge" class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-600 ring-2 ring-white"></span>
-      </button>
-      <span class="text-sm text-gray-400">Live Arena Panel</span>
-    </div>
-    <div id="notificationDropdown" class="hidden absolute right-6 mt-2 w-64 bg-[#1a1a2e] border border-purple-700 rounded-md shadow-lg z-50 transition-all duration-300 transform origin-top-right scale-100">
-      <div class="p-4 border-b border-purple-700 font-semibold text-yellow-400">Notifications</div>
-      <ul class="max-h-48 overflow-y-auto text-gray-300">
-        <li class="p-3 hover:bg-purple-700 cursor-pointer">New match starting soon!</li>
-        <li class="p-3 hover:bg-purple-700 cursor-pointer">You have 3 new messages.</li>
-        <li class="p-3 hover:bg-purple-700 cursor-pointer">Leaderboard updated.</li>
-        <li class="p-3 hover:bg-purple-700 cursor-pointer">Tournament schedule changed.</li>
-      </ul>
-      <div class="p-2 text-center text-sm text-gray-400 cursor-pointer hover:text-yellow-400">View all</div>
-    </div>
-  </header>
-
-  <main class="flex items-center justify-center px-4 py-8 w-full min-h-[calc(100vh-80px)]">
-    <div class="bg-[#1a1a2e] w-full max-w-5xl rounded-2xl shadow-2xl p-6 space-y-6 border border-purple-500">
-      <div class="flex items-center justify-between">
-        <div>
-          <h2 class="text-3xl font-bold text-yellow-400">Welcome, <span class="text-purple-400">GamerX</span></h2>
-          <p class="text-sm text-gray-400">Your tournament stats and progress</p>
-        </div>
-        <img src="https://i.pravatar.cc/150" alt="Profile" class="w-20 h-20 rounded-full ring-4 ring-yellow-500 shadow-lg" />
-      </div>
-      <div class="grid md:grid-cols-2 gap-4 bg-[#2d2d44] p-4 rounded-xl border border-purple-700">
-        <div>
-          <p class="text-sm text-gray-400">Username</p>
-          <p class="font-semibold text-lg">GamerX</p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-400">Email</p>
-          <p class="font-semibold text-lg">gamerx@tourney.com</p>
-        </div>
-      </div>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-        <div class="bg-[#121225] p-4 rounded-xl border border-yellow-600">
-          <p class="text-2xl font-extrabold text-yellow-300">#12</p>
-          <p class="text-sm text-gray-300">Current Rank</p>
-        </div>
-        <div class="bg-[#121225] p-4 rounded-xl border border-yellow-600">
-          <p class="text-2xl font-extrabold text-green-300">5</p>
-          <p class="text-sm text-gray-300">Matches Played</p>
-        </div>
-        <div class="bg-[#121225] p-4 rounded-xl border border-yellow-600">
-          <p class="text-2xl font-extrabold text-red-400">3</p>
-          <p class="text-sm text-gray-300">Wins</p>
-        </div>
-        <div class="bg-[#121225] p-4 rounded-xl border border-yellow-600">
-          <p class="text-2xl font-extrabold text-blue-400">1200</p>
-          <p class="text-sm text-gray-300">Points</p>
-        </div>
-      </div>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <button class="group bg-yellow-500 hover:bg-yellow-600 p-4 rounded-xl flex flex-col items-center justify-center space-y-2 transition font-bold">
-          <span class="text-xl group-hover:scale-110 transform transition">📅</span>
-          <span class="text-sm">View Schedule</span>
-        </button>
-        <button class="group bg-green-600 hover:bg-green-700 p-4 rounded-xl flex flex-col items-center justify-center space-y-2 transition font-bold">
-          <span class="text-xl group-hover:scale-110 transform transition">🎮</span>
-          <span class="text-sm">Join Match</span>
-        </button>
-        <button class="group bg-blue-600 hover:bg-blue-700 p-4 rounded-xl flex flex-col items-center justify-center space-y-2 transition font-bold">
-          <span class="text-xl group-hover:scale-110 transform transition">📊</span>
-          <span class="text-sm">Leaderboard</span>
-        </button>
-        <button class="group bg-red-600 hover:bg-red-700 p-4 rounded-xl flex flex-col items-center justify-center space-y-2 transition font-bold">
-          <span class="text-xl group-hover:scale-110 transform transition">🚪</span>
-          <span class="text-sm">Logout</span>
-        </button>
-      </div>
-      <div class="flex justify-center mt-6">
-        <button id="openJoinForm" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition">➕ Join Tournament</button>
-      </div>
-    </div>
-  </main>
-
-  <!-- Join Tournament Modal with Player List -->
-  <div id="joinFormModal" class="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-md z-50 hidden items-center justify-center">
-    <div class="bg-[#1a1a2e] border border-purple-700 p-6 rounded-xl w-full max-w-xl space-y-4 relative">
-      <button id="closeJoinForm" class="absolute top-3 right-4 text-yellow-400 hover:text-yellow-300 text-xl">✖</button>
-      <h3 class="text-xl font-bold text-yellow-400 mb-2">Join Tournament</h3>
-
-      <input type="text" placeholder="Payment Transaction ID" class="w-full p-2 rounded bg-gray-800 border border-purple-600 text-white placeholder-gray-400" />
-
-      <div id="playerList" class="space-y-4">
-        <div class="flex space-x-2">
-          <input type="text" placeholder="In-Game Name" class="flex-1 p-2 rounded bg-gray-800 border border-purple-600 text-white placeholder-gray-400" />
-          <input type="text" placeholder="UID" class="w-32 p-2 rounded bg-gray-800 border border-purple-600 text-white placeholder-gray-400" />
-        </div>
-      </div>
-
-      <div class="text-right">
-        <button id="addPlayer" class="text-purple-400 hover:text-purple-200 text-sm">➕ Add Player</button>
-      </div>
-
-      <button class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded mt-2 w-full">Submit</button>
-      <script>
-document.querySelector('#joinFormModal button.bg-purple-600').addEventListener('click', async () => {
-  const transactionId = joinFormModal.querySelector('input[placeholder="Payment Transaction ID"]').value;
-  const entries = playerList.querySelectorAll('.player-entry');
-
-  const players = [...entries].map(entry => {
-    const [nameInput, uidInput] = entry.querySelectorAll('input');
-    return {
-      name: nameInput.value,
-      uid: uidInput.value,
-      transaction_id: transactionId
-    };
-  });
-
-  const { data: { user } } = await supabase.auth.getUser();
-
-  for (const player of players) {
-    await supabase.from('players').insert({
-      ...player,
-      user_id: user.id
-    });
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('-translate-x-full');
   }
 
-  alert("Players saved successfully!");
-  hideModal(joinFormModal);
-});
-</script>
-
-    </div>
-  </div>
-
-  <!-- Game Gear Modal -->
-<div id="gameGearModal" class="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-md z-50 hidden items-center justify-center">
-  <div class="bg-[#1a1a2e] border border-purple-700 p-6 rounded-xl w-full max-w-3xl space-y-6 relative">
-    <button id="closeGameGearModal" class="absolute top-3 right-4 text-yellow-400 hover:text-yellow-300 text-xl">✖</button>
-    <h3 class="text-xl font-bold text-yellow-400 mb-4">Battle Royale Games</h3>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <!-- Example Game Cards -->
-      <div class="bg-gray-800 p-4 rounded border border-purple-600">
-        <h4 class="text-lg font-semibold text-white mb-2">PUBG Mobile</h4>
-        <p class="text-gray-400 text-sm mb-2">Entry Fee: ₹50</p>
-        <button class="join-game-btn bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded w-full"
-          data-game="PUBG Mobile" data-price="₹50">Join</button>
-      </div>
-      <div class="bg-gray-800 p-4 rounded border border-purple-600">
-        <h4 class="text-lg font-semibold text-white mb-2">Free Fire</h4>
-        <p class="text-gray-400 text-sm mb-2">Entry Fee: ₹30</p>
-        <button class="join-game-btn bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded w-full"
-          data-game="Free Fire" data-price="₹30">Join</button>
-      </div>
-      <!-- Add more games as needed -->
-    </div>
-  </div>
-</div>
-
-<!-- Player List Modal -->
-<div id="playerListModal" class="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-md z-50 hidden items-center justify-center">
-  <div class="bg-[#1a1a2e] border border-purple-700 p-6 rounded-xl w-full max-w-lg space-y-4 relative">
-    <button id="closePlayerListModal" class="absolute top-3 right-4 text-yellow-400 hover:text-yellow-300 text-xl">✖</button>
-    <h3 class="text-xl font-bold text-yellow-400">Your Team</h3>
-    <div id="savedPlayers" class="space-y-2 text-white text-sm"></div>
-    <script>
-async function loadPlayers() {
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: players } = await supabase.from('players').select('*').eq('user_id', user.id);
-
-  const savedPlayers = document.getElementById('savedPlayers');
-  savedPlayers.innerHTML = '';
-
-  players.forEach(player => {
-    const div = document.createElement('div');
-    div.classList = 'flex justify-between items-center';
-    div.innerHTML = `
-      <span>${player.name} (UID: ${player.uid})</span>
-      <button onclick="deletePlayer('${player.id}')" class="text-red-400">❌</button>
-    `;
-    savedPlayers.appendChild(div);
-  });
-}
-
-async function deletePlayer(id) {
-  await supabase.from('players').delete().eq('id', id);
-  loadPlayers();
-}
-</script>
-
-    <p id="joiningPrice" class="text-yellow-400 font-semibold text-center"></p>
-  </div>
-</div>
-
-  
-  <footer class="w-full bg-[#121225] text-center py-4 border-t border-purple-700 text-sm text-gray-400">
-    © 2025 TournamentZone. All rights reserved.
-  </footer>
-
-  <script>
-  const notificationBtn = document.getElementById('notificationBtn');
-  const notificationDropdown = document.getElementById('notificationDropdown');
-  const notificationBadge = document.getElementById('notificationBadge');
-  const menuBtn = document.getElementById('menuBtn');
-  const sidebar = document.getElementById('sidebar');
-  const closeSidebar = document.getElementById('closeSidebar');
-
-  const openJoinForm = document.getElementById('openJoinForm');
-  const joinFormModal = document.getElementById('joinFormModal');
-  const closeJoinForm = document.getElementById('closeJoinForm');
-
-  const playerList = document.getElementById('playerList');
-  const addPlayer = document.getElementById('addPlayer');
-
-  const profileModal = document.getElementById('profileModal');
-  const closeProfileModal = document.getElementById('closeProfileModal');
-
-  const gameGearModal = document.getElementById('gameGearModal');
-  const closeGameGearModal = document.getElementById('closeGameGearModal');
-
-  const playerListModal = document.getElementById('playerListModal');
-  const closePlayerListModal = document.getElementById('closePlayerListModal');
-  const savedPlayers = document.getElementById('savedPlayers');
-  const joiningPrice = document.getElementById('joiningPrice');
-
-  function showModal(modal) {
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+  function showTab(tabId) {
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.add('hidden'));
+    document.getElementById(tabId).classList.remove('hidden');
+    localStorage.setItem('activeTab', tabId);
+    if (window.innerWidth < 768) toggleSidebar(); // auto-close on mobile
   }
 
-  function hideModal(modal) {
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-  }
+  window.onload = async function () {
+    showTab(localStorage.getItem('activeTab') || 'profile');
 
-  notificationBtn.addEventListener('click', () => {
-    notificationDropdown.classList.toggle('hidden');
-    if (!notificationDropdown.classList.contains('hidden')) {
-      notificationBadge.style.display = 'none';
-    }
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
-      notificationDropdown.classList.add('hidden');
-    }
-    if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
-      sidebar.classList.add('-translate-x-full');
-    }
-  });
-
-  menuBtn.addEventListener('click', () => sidebar.classList.remove('-translate-x-full'));
-  closeSidebar.addEventListener('click', () => sidebar.classList.add('-translate-x-full'));
-
-  openJoinForm.addEventListener('click', () => showModal(joinFormModal));
-  closeJoinForm.addEventListener('click', () => hideModal(joinFormModal));
-
-  // Add player logic
-  addPlayer.addEventListener('click', () => {
-    const currentPlayers = playerList.querySelectorAll('.player-entry').length;
-    if (currentPlayers >= 5) {
-      alert("You can only add up to 5 players.");
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      alert("Not logged in!");
+      window.location.href = "/login";
       return;
     }
 
-    const div = document.createElement('div');
-    div.className = 'flex space-x-2 items-center player-entry';
+    const { name, mobile } = user.user_metadata || {};
+    document.getElementById("username").textContent = name || "No Name";
+    document.getElementById("email").textContent = user.email || "No Email";
+    document.getElementById("mobile").textContent = mobile || "Not Provided";
+  };
 
-    div.innerHTML = `
-      <input type="text" placeholder="In-Game Name" class="flex-1 p-2 rounded bg-gray-800 border border-purple-600 text-white placeholder-gray-400" />
-      <input type="text" placeholder="UID" class="w-32 p-2 rounded bg-gray-800 border border-purple-600 text-white placeholder-gray-400" />
-      <button class="text-red-400 hover:text-red-300 text-xl">❌</button>
-    `;
+  async function updateInfo() {
+    const name = document.getElementById("newName").value;
+    const email = document.getElementById("newEmail").value;
+    const mobile = document.getElementById("newMobile").value;
 
-    div.querySelector('button').onclick = () => {
-      div.remove();
-      addPlayer.disabled = false;
-      addPlayer.classList.remove('opacity-50', 'cursor-not-allowed');
-    };
-
-    playerList.appendChild(div);
-
-    if (playerList.querySelectorAll('.player-entry').length >= 5) {
-      addPlayer.disabled = true;
-      addPlayer.classList.add('opacity-50', 'cursor-not-allowed');
-    }
-  });
-
-  // Profile Settings trigger
-  const profileSettingsItem = [...document.querySelectorAll('#sidebar li')].find(li => li.textContent.includes('Profile Settings'));
-  profileSettingsItem.addEventListener('click', () => showModal(profileModal));
-  closeProfileModal.addEventListener('click', () => hideModal(profileModal));
-
-  // Game Gear
-  const gameGearItem = [...document.querySelectorAll('#sidebar li')].find(li => li.textContent.includes('Game Gear'));
-  gameGearItem.addEventListener('click', () => showModal(gameGearModal));
-  closeGameGearModal.addEventListener('click', () => hideModal(gameGearModal));
-
-  // Player List modal
-  closePlayerListModal.addEventListener('click', () => hideModal(playerListModal));
-
-  // Join button in game card
-  document.querySelectorAll('.join-game-btn').forEach(button => {
-    button.addEventListener('click', () => {
-      const players = document.querySelectorAll('#playerList .player-entry');
-      if (players.length === 0) {
-        alert("Please add at least one player before joining.");
-        return;
-      }
-
-      savedPlayers.innerHTML = '';
-      players.forEach((entry, index) => {
-        const inputs = entry.querySelectorAll('input');
-        if (inputs.length === 2 && inputs[0].value && inputs[1].value) {
-          const name = inputs[0].value;
-          const uid = inputs[1].value;
-          savedPlayers.innerHTML += `<div>Player ${index + 1}: ${name} (UID: ${uid})</div>`;
-        }
-      });
-
-      joiningPrice.innerText = `Joining Price: ${button.getAttribute('data-price')}`;
-      loadPlayers(); // 👈 add this line before showModal
-      showModal(playerListModal);
+    const { error } = await supabase.auth.updateUser({
+      email,
+      data: { name, mobile }
     });
-  });
 
-  // Escape key closes modals
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      [joinFormModal, profileModal, gameGearModal, playerListModal].forEach(hideModal);
+    if (error) {
+      alert("Error updating profile: " + error.message);
+    } else {
+      alert("Profile updated!");
+      location.reload();
     }
-  });
+  }
 
-  // Fix: Add missing class to default player input
-  const defaultPlayerDiv = playerList.querySelector('div');
-  if (defaultPlayerDiv) defaultPlayerDiv.classList.add('player-entry', 'items-center');
+  async function changePassword() {
+    const newPassword = document.getElementById("newPassword").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
 
+    if (newPassword !== confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
 
-async function getUserInfo() {
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) return;
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
 
-  const { email, user_metadata } = user;
+    if (error) {
+      alert("Error changing password: " + error.message);
+    } else {
+      alert("Password changed successfully!");
+    }
+  }
 
-  // Panel top right section
-  document.querySelector('span.text-purple-400').textContent = user_metadata?.username || 'Player';
-
-  // Inside user panel info
-  document.querySelectorAll('p.font-semibold.text-lg')[0].textContent = user_metadata?.name || 'No Name';
-  document.querySelectorAll('p.font-semibold.text-lg')[1].textContent = email;
-
-  // Fill Profile Modal inputs
-  document.querySelector('#profileModal input[placeholder="Full Name"]').value = user_metadata?.name || '';
-  document.querySelector('#profileModal input[placeholder="Update Mobile Number"]').value = user_metadata?.mobile || '';
-  document.querySelector('#profileModal input[placeholder="Update Email ID"]').value = email;
-}
-
-getUserInfo(); // Call on page load
-
+  async function logout() {
+    await supabase.auth.signOut();
+    alert("You have been logged out!");
+    window.location.href = "/login";
+  }
 </script>
+
 </body>
 </html>
